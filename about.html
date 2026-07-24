@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>About Us - PDF Assistant</title>
+  <meta name="description" content="Learn about PDF Assistant, our mission, and our secure, browser-based PDF generation technology." />
+  <link rel="canonical" href="https://text-to-pdf-zeta.vercel.app/about.html" />
+  <meta name="google-adsense-account" content="ca-pub-3815297713781075">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3815297713781075" crossorigin="anonymous"></script>
+  <style>
+    .content-page {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 40px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    .content-page h1 {
+      color: var(--primary);
+      margin-bottom: 24px;
+      font-size: 2.2rem;
+    }
+    .content-page h2 {
+      color: var(--ink);
+      margin-top: 32px;
+      margin-bottom: 16px;
+      font-size: 1.5rem;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 8px;
+    }
+    .content-page p, .content-page li {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: #4a5568;
+      margin-bottom: 16px;
+    }
+    .back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 700;
+      margin-bottom: 30px;
+    }
+    .back-home:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <header class="global-navbar">
+    <div class="nav-container">
+      <div class="brand-lockup">
+        <img src="logo.png.png" alt="PDF Assistant Logo" class="site-logo">
+        <div>
+          <p class="eyebrow">PDF Assistant</p>
+          <h1>Text to PDF Converter</h1>
+        </div>
+      </div>
+      <nav class="converter-nav">
+        <a href="index.html" class="nav-item">Text to PDF</a>
+        <div class="nav-dropdown">
+          <a class="nav-item nav-dropdown-trigger">Convert from PDF</a>
+          <div class="nav-dropdown-menu">
+            <a href="pdf-to-text.html" class="nav-dropdown-item">PDF to Text</a>
+            <a href="pdf-to-jpg.html" class="nav-dropdown-item">PDF to JPG</a>
+            <a href="pdf-to-word.html" class="nav-dropdown-item">PDF to Word</a>
+            <a href="pdf-to-powerpoint.html" class="nav-dropdown-item">PDF to PowerPoint</a>
+            <a href="pdf-to-excel.html" class="nav-dropdown-item">PDF to Excel</a>
+            <a href="pdf-to-pdfa.html" class="nav-dropdown-item">PDF to PDF/A</a>
+          </div>
+        </div>
+        <a href="merge-pdf.html" class="nav-item">Merge PDF</a>
+        <a href="compress-pdf.html" class="nav-item">Compress PDF</a>
+        <a href="guides.html" class="nav-item">Guides</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="content-page">
+    <a href="index.html" class="back-home">← Back to PDF Assistant</a>
+    <h1>About Us</h1>
+    <p>Welcome to <strong>PDF Assistant</strong>, your trusted and secure online text-to-PDF compiler and letter generator.</p>
+
+    <h2>Our Mission</h2>
+    <p>Our mission is simple: to provide clean, fast, and accessible document formatting utilities for students, job seekers, and business professionals. We believe that generating standard letters and formatting papers shouldn't require installing complex software, purchasing subscriptions, or uploading private documents to external servers.</p>
+
+    <h2>Secure, Browser-Based Technology</h2>
+    <p>Unlike traditional online PDF converters that require uploading your document files to remote servers, PDF Assistant is designed with a **privacy-first approach**. All processes—including rich text layouts, style conversions, and PDF document generation—happen entirely inside your own browser window using client-side JavaScript. This means your text and personal data never leave your device, ensuring maximum security and confidentiality.</p>
+
+    <h2>Core Features</h2>
+    <ul>
+      <li><strong>Local Generation:</strong> Safe processing that keeps your data private.</li>
+      <li><strong>Rich Formatting Tools:</strong> Adjust fonts (Helvetica, Times, Courier), scale font sizes dynamically, and colorize individual characters.</li>
+      <li><strong>Smart Templates:</strong> Load standard business templates for formal requests, job queries, proposals, or thank you notes with one click.</li>
+      <li><strong>Live Preview:</strong> See your paper layout adjust in real-time before downloading.</li>
+    </ul>
+
+    <h2>Who We Are</h2>
+    <p>We are a team of software developers dedicated to building lightweight, functional web utilities. PDF Assistant is maintained and optimized regularly to ensure compliance with the latest web and PDF standards. We are supported by non-intrusive advertisements to keep our utility 100% free for everyone.</p>
+  </main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const trigger = document.querySelector('.nav-dropdown-trigger');
+    if (trigger) {
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const menu = trigger.nextElementSibling;
+        if (menu) menu.classList.toggle('show');
+      });
+      document.addEventListener('click', () => {
+        const menu = trigger.nextElementSibling;
+        if (menu) menu.classList.remove('show');
+      });
+    }
+  });
+</script>
+
+</body>
+</html>

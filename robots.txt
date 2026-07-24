@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://text-to-pdf-zeta.vercel.app/sitemap.xml

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>Contact Us - PDF Assistant</title>
+  <meta name="description" content="Get in touch with PDF Assistant. Contact details and support information." />
+  <link rel="canonical" href="https://text-to-pdf-zeta.vercel.app/contact.html" />
+  <meta name="google-adsense-account" content="ca-pub-3815297713781075">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3815297713781075" crossorigin="anonymous"></script>
+  <style>
+    .content-page {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 40px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    .content-page h1 {
+      color: var(--primary);
+      margin-bottom: 24px;
+      font-size: 2.2rem;
+    }
+    .content-page h2 {
+      color: var(--ink);
+      margin-top: 32px;
+      margin-bottom: 16px;
+      font-size: 1.5rem;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 8px;
+    }
+    .content-page p {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: #4a5568;
+      margin-bottom: 16px;
+    }
+    .contact-info {
+      background: var(--soft);
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid rgba(15, 118, 110, 0.15);
+      margin-top: 20px;
+    }
+    .contact-info p {
+      margin: 8px 0;
+      font-weight: 600;
+      color: var(--primary-dark);
+    }
+    .back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 700;
+      margin-bottom: 30px;
+    }
+    .back-home:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <header class="global-navbar">
+    <div class="nav-container">
+      <div class="brand-lockup">
+        <img src="logo.png.png" alt="PDF Assistant Logo" class="site-logo">
+        <div>
+          <p class="eyebrow">PDF Assistant</p>
+          <h1>Text to PDF Converter</h1>
+        </div>
+      </div>
+      <nav class="converter-nav">
+        <a href="index.html" class="nav-item">Text to PDF</a>
+        <div class="nav-dropdown">
+          <a class="nav-item nav-dropdown-trigger">Convert from PDF</a>
+          <div class="nav-dropdown-menu">
+            <a href="pdf-to-text.html" class="nav-dropdown-item">PDF to Text</a>
+            <a href="pdf-to-jpg.html" class="nav-dropdown-item">PDF to JPG</a>
+            <a href="pdf-to-word.html" class="nav-dropdown-item">PDF to Word</a>
+            <a href="pdf-to-powerpoint.html" class="nav-dropdown-item">PDF to PowerPoint</a>
+            <a href="pdf-to-excel.html" class="nav-dropdown-item">PDF to Excel</a>
+            <a href="pdf-to-pdfa.html" class="nav-dropdown-item">PDF to PDF/A</a>
+          </div>
+        </div>
+        <a href="merge-pdf.html" class="nav-item">Merge PDF</a>
+        <a href="compress-pdf.html" class="nav-item">Compress PDF</a>
+        <a href="guides.html" class="nav-item">Guides</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="content-page">
+    <a href="index.html" class="back-home">← Back to PDF Assistant</a>
+    <h1>Contact Us</h1>
+    <p>We are always eager to receive your questions, feedback, bug reports, or feature suggestions. If you have any inquiries regarding the use of PDF Assistant, please contact us.</p>
+    
+    <h2>Support Information</h2>
+    <p>For technical support, reporting issues, or any other feedback, you can reach out directly via email. We aim to reply to all queries within 24–48 hours.</p>
+
+    <div class="contact-info">
+      <p>Email: deephanwork@gmail.com</p>
+      <p>Operating Hours: Monday – Friday, 9:00 AM – 5:00 PM (EST)</p>
+    </div>
+  </main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const trigger = document.querySelector('.nav-dropdown-trigger');
+    if (trigger) {
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const menu = trigger.nextElementSibling;
+        if (menu) menu.classList.toggle('show');
+      });
+      document.addEventListener('click', () => {
+        const menu = trigger.nextElementSibling;
+        if (menu) menu.classList.remove('show');
+      });
+    }
+  });
+</script>
+
+</body>
+</html>

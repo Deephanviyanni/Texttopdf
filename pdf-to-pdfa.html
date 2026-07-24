@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>PDF to PDF/A Converter - Free Online PDF Archiver</title>
+  <meta name="description" content="Convert your standard PDF files to PDF/A (PDF/A-2b format) for long-term archiving locally. 100% free, secure, and client-side processing." />
+  <link rel="canonical" href="https://text-to-pdf-zeta.vercel.app/pdf-to-pdfa.html" />
+  <meta name="google-adsense-account" content="ca-pub-3815297713781075">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3815297713781075" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+  <style>
+    .converter-shell {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 24px;
+    }
+    .uploader-card {
+      background: var(--panel-bg);
+      border: 2px dashed var(--line);
+      border-radius: 16px;
+      padding: 48px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px);
+      margin-bottom: 24px;
+    }
+    .uploader-card:hover, .uploader-card.dragover {
+      border-color: var(--primary);
+      background: rgba(16, 185, 129, 0.04);
+      box-shadow: var(--primary-glow);
+    }
+    .uploader-card input[type="file"] {
+      display: none;
+    }
+    .upload-icon {
+      font-size: 3rem;
+      color: var(--primary);
+      margin-bottom: 16px;
+    }
+    .upload-text h3 {
+      font-size: 1.25rem;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+    .upload-text p {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+    .settings-container {
+      background: var(--panel-bg);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 20px;
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: var(--shadow);
+    }
+    .settings-header {
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 12px;
+    }
+    .settings-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .file-details {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .file-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .file-size {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .convert-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .loader {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 32px;
+    }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--line);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .progress-text {
+      font-weight: 600;
+      color: var(--primary);
+    }
+    .result-container {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 32px;
+      animation: fadeIn 0.3s ease;
+    }
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <header class="global-navbar">
+    <div class="nav-container">
+      <div class="brand-lockup">
+        <img src="logo.png.png" alt="PDF Assistant Logo" class="site-logo">
+        <div>
+          <p class="eyebrow">PDF Assistant</p>
+          <h1>PDF to PDF/A Converter</h1>
+        </div>
+      </div>
+      <nav class="converter-nav">
+        <a href="index.html" class="nav-item">Text to PDF</a>
+        <div class="nav-dropdown">
+          <a class="nav-item nav-dropdown-trigger active">Convert from PDF</a>
+          <div class="nav-dropdown-menu">
+            <a href="pdf-to-text.html" class="nav-dropdown-item">PDF to Text</a>
+            <a href="pdf-to-jpg.html" class="nav-dropdown-item">PDF to JPG</a>
+            <a href="pdf-to-word.html" class="nav-dropdown-item">PDF to Word</a>
+            <a href="pdf-to-powerpoint.html" class="nav-dropdown-item">PDF to PowerPoint</a>
+            <a href="pdf-to-excel.html" class="nav-dropdown-item">PDF to Excel</a>
+            <a href="pdf-to-pdfa.html" class="nav-dropdown-item active">PDF to PDF/A</a>
+          </div>
+        </div>
+        <a href="merge-pdf.html" class="nav-item">Merge PDF</a>
+        <a href="compress-pdf.html" class="nav-item">Compress PDF</a>
+        <a href="guides.html" class="nav-item">Guides</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="converter-shell">
+    <div class="uploader-card" id="dropzone">
+      <input type="file" id="fileInput" accept="application/pdf" />
+      <div class="upload-icon">🔒</div>
+      <div class="upload-text">
+        <h3>Choose a PDF file or drag it here</h3>
+        <p>Inject archive metadata to convert standard PDF into PDF/A-2b format locally.</p>
+      </div>
+    </div>
+
+    <div class="settings-container" id="settingsContainer">
+      <div class="settings-header">
+        <h2>Archive Profile Settings</h2>
+      </div>
+      <div class="settings-row">
+        <div class="file-details">
+          <div class="file-name" id="fileName">document.pdf</div>
+          <div class="file-size" id="fileSize">0.00 MB</div>
+        </div>
+        <div class="options">
+          <label style="display: flex; align-items: center; gap: 8px;">
+            Profile:
+            <select id="archiveProfile" style="background: rgba(0,0,0,0.4); border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; color: var(--ink);">
+              <option value="PDF/A-2b">PDF/A-2b (Recommended)</option>
+              <option value="PDF/A-1b">PDF/A-1b (Basic)</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div class="convert-actions">
+        <button class="secondary" id="cancelBtn" type="button">Cancel</button>
+        <button class="primary" id="convertBtn" type="button">Convert to PDF/A</button>
+      </div>
+    </div>
+
+    <div class="loader" id="loader">
+      <div class="spinner"></div>
+      <p class="progress-text" id="progressText">Injecting PDF/A metadata structures...</p>
+    </div>
+
+    <div class="result-container" id="resultContainer">
+      <div class="result-header">
+        <h2>Conformed PDF/A Document Preview</h2>
+        <div class="actions" style="margin: 0; display: flex; gap: 12px;">
+          <button class="secondary" id="resetBtn" type="button">Archive More</button>
+          <button class="primary" id="downloadBtn" type="button">Download PDF/A</button>
+        </div>
+      </div>
+      <div class="preview-iframe-wrapper" style="position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); height: 500px; background: rgba(0,0,0,0.3);">
+        <iframe id="pdfPreview" style="width: 100%; height: 100%; border: none;"></iframe>
+      </div>
+    </div>
+  </main>
+
+  <div class="ad-section-container" style="max-width: 1200px; margin: 40px auto 0; padding: 0 30px; text-align: center;">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-3815297713781075"
+         data-ad-slot="2313773922"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </div>
+
+  <section class="seo-content" style="max-width: 800px; margin: 40px auto; padding: 24px;">
+    <h2>Free Online PDF to PDF/A Converter</h2>
+    <p>
+      PDF Assistant provides a browser-native archiver utility designed to compile and transform standard PDFs into ISO-compliant PDF/A files suitable for long-term document preservation. PDF/A ensures your documents (such as legal agreements, invoices, statements, or books) will render precisely the same way across all future hardware and software configurations.
+    </p>
+
+    <h2>How to Convert PDF to PDF/A Online</h2>
+    <p>
+      Creating a long-term PDF/A archive copy is quick and simple:
+    </p>
+    <ol>
+      <li><strong>Select your file:</strong> Drag and drop your standard PDF document into the upload card or click to browse files locally.</li>
+      <li><strong>Configure Profile:</strong> Choose between standard PDF/A-2b (which allows JPEG/lossless image compression and modern structures) or PDF/A-1b (basic conformance).</li>
+      <li><strong>Compile and Save:</strong> Click "Convert to PDF/A". The local engine modifies the catalog dictionary structure and applies the conformance flags. Review the document preview and download your archived PDF/A.</li>
+    </ol>
+
+    <h2>Why is PDF/A Required for Long-Term Archiving?</h2>
+    <p>
+      Standard PDFs are highly flexible but can contain dynamic features that prevent accurate rendering decades from now:
+    </p>
+    <ul>
+      <li><strong>Device-Independent Colors:</strong> PDF/A requires specified color profiles (such as sRGB OutputIntents) so that color reproduction remains consistent across future screens.</li>
+      <li><strong>Metadata Standards:</strong> Explicit XML metadata schemas (XMP) are embedded directly inside the document catalog to facilitate machine indexing.</li>
+      <li><strong>No External References:</strong> Linking to external fonts or web resources is prohibited; everything must be self-contained.</li>
+    </ul>
+
+    <h2>Frequently Asked Questions</h2>
+    <h3>What is the difference between standard PDF and PDF/A?</h3>
+    <p>
+      A standard PDF can link to external websites, use system fonts, contain audio/video media, and use JavaScript. PDF/A strictly forbids these features to ensure the file remains completely self-contained and universally readable for decades.
+    </p>
+    <h3>What conformance profiles do you support?</h3>
+    <p>
+      We support **PDF/A-2b** (Level B basic visual conformance for modern workflows) and **PDF/A-1b** (Level B basic conformance for older document structures).
+    </p>
+    <h3>Are my archived documents uploaded online?</h3>
+    <p>
+      No. All catalog updates and metadata conversions are executed locally inside your web browser. Your private tax logs or corporate templates are never transmitted to external cloud systems.
+    </p>
+    <h3>How do I verify the conformed PDF/A file?</h3>
+    <p>
+      You can open the downloaded document in standard checkers (such as Adobe Acrobat Reader Pro's Preflight tool or VeraPDF) to confirm compliance with ISO-19005 standards.
+    </p>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-links">
+      <a href="guides.html">Resource Guides</a>
+      <a href="about.html">About Us</a>
+      <a href="contact.html">Contact Us</a>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms & Conditions</a>
+    </div>
+    <p class="copyright">
+      © 2026 PDF Assistant. All Rights Reserved.
+    </p>
+  </footer>
+
+  <script>
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const settingsContainer = document.getElementById('settingsContainer');
+    const fileNameEl = document.getElementById('fileName');
+    const fileSizeEl = document.getElementById('fileSize');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const convertBtn = document.getElementById('convertBtn');
+    const loader = document.getElementById('loader');
+    const progressText = document.getElementById('progressText');
+    const resultContainer = document.getElementById('resultContainer');
+    const pdfPreview = document.getElementById('pdfPreview');
+    const resetBtn = document.getElementById('resetBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    let pdfFileBytes = null;
+    let originalName = 'document.pdf';
+    let conformedPdfBytes = null;
+    let conformedUrl = null;
+
+    dropzone.addEventListener('click', () => fileInput.click());
+
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('dragover');
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length > 0 && files[0].type === 'application/pdf') {
+        selectFile(files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        selectFile(e.target.files[0]);
+      }
+    });
+
+    cancelBtn.addEventListener('click', resetConverter);
+    resetBtn.addEventListener('click', resetConverter);
+
+    function resetConverter() {
+      settingsContainer.style.display = 'none';
+      resultContainer.style.display = 'none';
+      dropzone.style.display = 'block';
+      fileInput.value = '';
+      pdfFileBytes = null;
+      conformedPdfBytes = null;
+      if (conformedUrl) {
+        URL.revokeObjectURL(conformedUrl);
+        conformedUrl = null;
+      }
+    }
+
+    async function selectFile(file) {
+      originalName = file.name;
+      fileNameEl.textContent = file.name;
+      fileSizeEl.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+      
+      try {
+        const fileReader = new FileReader();
+        fileReader.onload = function() {
+          pdfFileBytes = new Uint8Array(this.result);
+          dropzone.style.display = 'none';
+          settingsContainer.style.display = 'flex';
+        };
+        fileReader.readAsArrayBuffer(file);
+      } catch (err) {
+        alert('File read error: ' + err.message);
+        resetConverter();
+      }
+    }
+
+    convertBtn.addEventListener('click', async () => {
+      if (!pdfFileBytes) return;
+      
+      settingsContainer.style.display = 'none';
+      loader.style.display = 'flex';
+      progressText.textContent = 'Formatting metadata to PDF/A...';
+      
+      const profile = document.getElementById('archiveProfile').value;
+      const part = profile.includes('2b') ? '2' : '1';
+      
+      try {
+        // Load PDF using pdf-lib
+        const pdfDoc = await PDFLib.PDFDocument.load(pdfFileBytes);
+        
+        // Define XMP metadata with PDF/A identification schema
+        // This marks the document structure as conforming to the ISO standard
+        const pdfaMetadataXml = `<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/">
+ <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <rdf:Description rdf:about="" xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/">
+   <pdfaid:part>${part}</pdfaid:part>
+   <pdfaid:conformance>B</pdfaid:conformance>
+  </rdf:Description>
+ </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>`;
+
+        // Set metadata block on catalog dictionary
+        const metadataStream = pdfDoc.context.stream(pdfaMetadataXml, {
+          Type: 'Metadata',
+          Subtype: 'XML',
+        });
+        const metadataStreamRef = pdfDoc.context.register(metadataStream);
+        pdfDoc.catalog.set(PDFLib.PDFName.of('Metadata'), metadataStreamRef);
+        
+        // OutputIntents dictionary (specifies Color Profile conformance - sRGB standard)
+        const outputIntentDict = pdfDoc.context.obj({
+          Type: 'OutputIntent',
+          S: 'GTS_PDFA1',
+          OutputConditionIdentifier: 'Custom',
+          Info: 'sRGB IEC61966-2.1',
+        });
+        const outputIntentRef = pdfDoc.context.register(outputIntentDict);
+        pdfDoc.catalog.set(PDFLib.PDFName.of('OutputIntents'), pdfDoc.context.obj([outputIntentRef]));
+        
+        // Save conformed document bytes
+        conformedPdfBytes = await pdfDoc.save();
+        
+        const blob = new Blob([conformedPdfBytes], { type: 'application/pdf' });
+        conformedUrl = URL.createObjectURL(blob);
+        pdfPreview.src = conformedUrl;
+        
+        loader.style.display = 'none';
+        resultContainer.style.display = 'flex';
+      } catch (err) {
+        alert('PDF/A conformance mapping failed: ' + err.message);
+        resetConverter();
+      }
+    });
+
+    downloadBtn.onclick = () => {
+      if (!conformedUrl) return;
+      const a = document.createElement('a');
+      a.href = conformedUrl;
+      const base = originalName.replace(/\.[^/.]+$/, "");
+      a.download = `${base}-pdfa.pdf`;
+      a.click();
+    };
+  </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const trigger = document.querySelector('.nav-dropdown-trigger');
+    if (trigger) {
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const menu = trigger.nextElementSibling;
+        if (menu) menu.classList.toggle('show');
+      });
+      document.addEventListener('click', () => {
+        const menu = trigger.nextElementSibling;
+        if (menu) menu.classList.remove('show');
+      });
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>PDF to Excel Converter - Free Online PDF to XLSX</title>
+  <meta name="description" content="Convert your PDF tables and text data to Microsoft Excel spreadsheets locally. 100% free, secure, and client-side processing." />
+  <link rel="canonical" href="https://text-to-pdf-zeta.vercel.app/pdf-to-excel.html" />
+  <meta name="google-adsense-account" content="ca-pub-3815297713781075">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3815297713781075" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    .converter-shell {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 24px;
+    }
+    .uploader-card {
+      background: var(--panel-bg);
+      border: 2px dashed var(--line);
+      border-radius: 16px;
+      padding: 48px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px);
+    }
+    .uploader-card:hover, .uploader-card.dragover {
+      border-color: var(--primary);
+      background: rgba(16, 185, 129, 0.04);
+      box-shadow: var(--primary-glow);
+    }
+    .uploader-card input[type="file"] {
+      display: none;
+    }
+    .upload-icon {
+      font-size: 3rem;
+      color: var(--primary);
+      margin-bottom: 16px;
+    }
+    .upload-text h3 {
+      font-size: 1.25rem;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+    .upload-text p {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+    .result-container {
+      margin-top: 32px;
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      animation: fadeIn 0.3s ease;
+    }
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .table-preview-container {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.3);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+      max-height: 400px;
+    }
+    .preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--ink);
+      text-align: left;
+    }
+    .preview-table th, .preview-table td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 14px;
+      white-space: nowrap;
+    }
+    .preview-table th {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .preview-table tr:hover {
+      background: rgba(255, 255, 255, 0.01);
+    }
+    .loader {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 32px;
+    }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--line);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .progress-text {
+      font-weight: 600;
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <header class="global-navbar">
+    <div class="nav-container">
+      <div class="brand-lockup">
+        <img src="logo.png.png" alt="PDF Assistant Logo" class="site-logo">
+        <div>
+          <p class="eyebrow">PDF Assistant</p>
+          <h1>PDF to Excel</h1>
+        </div>
+      </div>
+      <nav class="converter-nav">
+        <a href="index.html" class="nav-item">Text to PDF</a>
+        <div class="nav-dropdown">
+          <a class="nav-item nav-dropdown-trigger active">Convert from PDF</a>
+          <div class="nav-dropdown-menu">
+            <a href="pdf-to-text.html" class="nav-dropdown-item">PDF to Text</a>
+            <a href="pdf-to-jpg.html" class="nav-dropdown-item">PDF to JPG</a>
+            <a href="pdf-to-word.html" class="nav-dropdown-item">PDF to Word</a>
+            <a href="pdf-to-powerpoint.html" class="nav-dropdown-item">PDF to PowerPoint</a>
+            <a href="pdf-to-excel.html" class="nav-dropdown-item active">PDF to Excel</a>
+            <a href="pdf-to-pdfa.html" class="nav-dropdown-item">PDF to PDF/A</a>
+          </div>
+        </div>
+        <a href="merge-pdf.html" class="nav-item">Merge PDF</a>
+        <a href="compress-pdf.html" class="nav-item">Compress PDF</a>
+        <a href="guides.html" class="nav-item">Guides</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="converter-shell">
+    <div class="uploader-card" id="dropzone">
+      <input type="file" id="fileInput" accept="application/pdf" />
+      <div class="upload-icon">📊</div>
+      <div class="upload-text">
+        <h3>Choose a PDF file or drag it here</h3>
+        <p>Extract tables, grids, and lists from PDF sheets into an XLSX workbook locally.</p>
+      </div>
+    </div>
+
+    <div class="loader" id="loader">
+      <div class="spinner"></div>
+      <p class="progress-text" id="progressText">Parsing tables...</p>
+    </div>
+
+    <div class="result-container" id="resultContainer">
+      <div class="result-header">
+        <div>
+          <h2>Excel Sheet Preview</h2>
+          <p class="eyebrow" id="fileMeta" style="text-transform: none; font-size: 0.85rem; color: var(--muted);"></p>
+        </div>
+        <div class="actions" style="margin: 0; display: flex; gap: 12px;">
+          <button class="secondary" id="resetBtn" type="button">Convert Another</button>
+          <button class="primary" id="downloadXlsxBtn" type="button">Download XLSX</button>
+        </div>
+      </div>
+      <div class="table-preview-container">
+        <table class="preview-table" id="previewTable"></table>
+      </div>
+    </div>
+  </main>
+
+  <div class="ad-section-container" style="max-width: 1200px; margin: 40px auto 0; padding: 0 30px; text-align: center;">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-3815297713781075"
+         data-ad-slot="2313773922"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </div>
+
+  <section class="seo-content" style="max-width: 900px; margin: 40px auto; padding: 24px;">
+    <h2>Convert PDF to Excel (XLSX) Online Free</h2>
+    <p>
+      PDF Assistant provides a robust browser-native tool to scan, extract, and convert tabular data, invoices, numeric reports, and catalogs from PDF layout files directly into structured Microsoft Excel (.xlsx) spreadsheets. Eliminate manual copy-pasting of financial numbers. All grid parsing is processed client-side.
+    </p>
+
+    <h2>How to Convert PDF Tables to Excel Spreadsheets Online</h2>
+    <p>
+      Extracting tables into a formatted Excel sheet is simple:
+    </p>
+    <ol>
+      <li><strong>Select your file:</strong> Drag and drop your PDF file containing data grids, or select it from your file explorer.</li>
+      <li><strong>Local Coordinate Sorting:</strong> Our script analyzes the coordinate bounding boxes (Y and X offsets) to correctly segment rows and columns without external server processing.</li>
+      <li><strong>Preview and Export:</strong> Review the extracted grid structure in our live preview table. Click "Download XLSX" to compile and save your new spreadsheet instantly.</li>
+    </ol>
+
+    <h2>Why Choose Local Excel Compilation?</h2>
+    <p>
+      Accounting spreadsheets, business invoices, and employee records contain highly sensitive information. Traditional converters process these files on cloud servers, posing a security risk. By extracting tables locally:
+    </p>
+    <ul>
+      <li><strong>Absolute Data Security:</strong> Your files never leave your machine; all numbers remain isolated.</li>
+      <li><strong>High Accuracy:</strong> Smart spacing analysis prevents multi-column text from blending into single lines.</li>
+      <li><strong>Instant Downloads:</strong> Download your `.xlsx` spreadsheet directly without server conversion lag.</li>
+    </ul>
+
+    <h2>Frequently Asked Questions</h2>
+    <h3>How does the converter detect columns without a server?</h3>
+    <p>
+      Our script parses text tokens using the PDF.js library. It measures the horizontal distances (X-coordinates) between adjacent characters. If a gap exceeds a specific pixel threshold, the text is split into a new column cell.
+    </p>
+    <h3>Can I convert scanned bank statements to Excel?</h3>
+    <p>
+      This converter extracts text data layers from digitally compiled PDFs. Scanned tables that exist only as image pixels require Optical Character Recognition (OCR) systems.
+    </p>
+    <h3>What format is the output sheet?</h3>
+    <p>
+      The tool generates a native Microsoft Excel sheet (`.xlsx`) using SheetJS, making it fully compatible with all spreadsheet applications.
+    </p>
+    <h3>Is my financial statement information uploaded online?</h3>
+    <p>
+      No. All parsing and sheet generation are executed in your browser's local sandbox, keeping your financial statements completely secure.
+    </p>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-links">
+      <a href="guides.html">Resource Guides</a>
+      <a href="about.html">About Us</a>
+      <a href="contact.html">Contact Us</a>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms & Conditions</a>
+    </div>
+    <p class="copyright">
+      © 2026 PDF Assistant. All Rights Reserved.
+    </p>
+  </footer>
+
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const loader = document.getElementById('loader');
+    const progressText = document.getElementById('progressText');
+    const resultContainer = document.getElementById('resultContainer');
+    const previewTable = document.getElementById('previewTable');
+    const fileMeta = document.getElementById('fileMeta');
+    const resetBtn = document.getElementById('resetBtn');
+    const downloadXlsxBtn = document.getElementById('downloadXlsxBtn');
+
+    let pdfDoc = null;
+    let fileNameBase = 'table-data';
+    let sheetRows = []; // Stores Array of arrays of cells
+
+    dropzone.addEventListener('click', () => fileInput.click());
+
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('dragover');
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length > 0 && files[0].type === 'application/pdf') {
+        handleFile(files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    resetBtn.addEventListener('click', resetConverter);
+
+    function resetConverter() {
+      resultContainer.style.display = 'none';
+      dropzone.style.display = 'block';
+      fileInput.value = '';
+      previewTable.innerHTML = '';
+      sheetRows = [];
+      pdfDoc = null;
+    }
+
+    async function handleFile(file) {
+      dropzone.style.display = 'none';
+      loader.style.display = 'flex';
+      progressText.textContent = 'Loading PDF...';
+      fileNameBase = file.name.replace(/\.[^/.]+$/, "");
+
+      try {
+        const fileReader = new FileReader();
+        fileReader.onload = async function() {
+          const typedarray = new Uint8Array(this.result);
+          try {
+            pdfDoc = await pdfjsLib.getDocument(typedarray).promise;
+            fileMeta.textContent = `${file.name} • ${pdfDoc.numPages} Pages`;
+            parseTables();
+          } catch (err) {
+            alert('Error parsing PDF: ' + err.message);
+            resetConverter();
+          }
+        };
+        fileReader.readAsArrayBuffer(file);
+      } catch (err) {
+        alert('File read error: ' + err.message);
+        resetConverter();
+      }
+    }
+
+    async function parseTables() {
+      try {
+        const numPages = pdfDoc.numPages;
+        
+        for (let i = 1; i <= numPages; i++) {
+          progressText.textContent = `Analyzing page ${i} of ${numPages}...`;
+          const page = await pdfDoc.getPage(i);
+          const textContent = await page.getTextContent();
+          
+          // Group text tokens by Y coordinate (rows)
+          let rowsMap = {};
+          textContent.items.forEach(item => {
+            const y = Math.round(item.transform[5] / 4) * 4; // Tolerance bucket
+            if (!rowsMap[y]) {
+              rowsMap[y] = [];
+            }
+            rowsMap[y].push(item);
+          });
+          
+          // Sort rows from top to bottom (Y descending)
+          const sortedYs = Object.keys(rowsMap).map(Number).sort((a, b) => b - a);
+          
+          sortedYs.forEach(y => {
+            const items = rowsMap[y];
+            // Sort items in row from left to right (X ascending)
+            items.sort((a, b) => a.transform[4] - b.transform[4]);
+            
+            // Build cell values based on horizontal spacing
+            let cells = [];
+            let lastX = null;
+            let lastWidth = null;
+            let currentCell = "";
+            
+            items.forEach(item => {
+              const x = item.transform[4];
+              // If there's a big gap, push the current cell and start a new cell
+              if (lastX !== null && (x - (lastX + lastWidth)) > 15) {
+                cells.push(currentCell.trim());
+                currentCell = "";
+              }
+              currentCell += item.str + " ";
+              lastX = x;
+              lastWidth = item.width || (item.str.length * 6);
+            });
+            if (currentCell.trim()) {
+              cells.push(currentCell.trim());
+            }
+            
+            if (cells.length > 0) {
+              sheetRows.push(cells);
+            }
+          });
+          
+          // Add a separator line between pages
+          if (i < numPages) {
+            sheetRows.push([`--- End of Page ${i} ---`]);
+          }
+        }
+        
+        displayPreview();
+        loader.style.display = 'none';
+        resultContainer.style.display = 'flex';
+      } catch (err) {
+        alert('Table extraction failed: ' + err.message);
+        resetConverter();
+      }
+    }
+
+    function displayPreview() {
+      // Limit preview to first 30 rows to avoid browser lag
+      const previewRows = sheetRows.slice(0, 30);
+      let html = "";
+      
+      previewRows.forEach((row, rIdx) => {
+        html += "<tr>";
+        row.forEach(cell => {
+          if (rIdx === 0) {
+            html += `<th>${cell}</th>`;
+          } else {
+            html += `<td>${cell}</td>`;
+          }
+        });
+        html += "</tr>";
+      });
+      
+      previewTable.innerHTML = html;
+    }
+
+    downloadXlsxBtn.onclick = () => {
+      if (sheetRows.length === 0) return;
+      
+      downloadXlsxBtn.disabled = true;
+      downloadXlsxBtn.textContent = 'Generating XLSX...';
+      
+      try {
+        const worksheet = XLSX.utils.aoa_to_sheet(sheetRows);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "PDF Extracted");
+        
+        // Export file
+        XLSX.writeFile(workbook, `${fileNameBase}.xlsx`);
+      } catch (err) {
+        alert('Failed to generate Excel file: ' + err.message);
+      } finally {
+        downloadXlsxBtn.disabled = false;
+        downloadXlsxBtn.textContent = 'Download XLSX';
+      }
+    };
+  </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const trigger = document.querySelector('.nav-dropdown-trigger');
+    if (trigger) {
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const menu = trigger.nextElementSibling;
+        if (menu) menu.classList.toggle('show');
+      });
+      document.addEventListener('click', () => {
+        const menu = trigger.nextElementSibling;
+        if (menu) menu.classList.remove('show');
+      });
+    }
+  });
+</script>
+
+</body>
+</html>

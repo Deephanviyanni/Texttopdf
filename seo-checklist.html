@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>On-Page SEO Optimization Checklist Tool - PDF Assistant</title>
+  <meta name="description" content="Audit and calculate your page's on-page SEO score with our interactive optimization checklist tool. 100% free and client-side." />
+  <link rel="canonical" href="https://text-to-pdf-zeta.vercel.app/seo-checklist.html" />
+  <meta name="google-adsense-account" content="ca-pub-3815297713781075">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3815297713781075" crossorigin="anonymous"></script>
+  <style>
+    .converter-shell {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 24px;
+    }
+    .checklist-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px);
+    }
+    .score-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+    .progress-bar-bg {
+      width: 100%;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      border-radius: 6px;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s ease;
+    }
+    .score-badge {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--ink);
+      transition: color 0.3s ease;
+    }
+    .score-badge.complete {
+      color: var(--primary);
+    }
+    .checklist-items {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .checklist-item:hover {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    .checklist-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--primary);
+      cursor: pointer;
+      margin-top: 2px;
+    }
+    .checklist-label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .checklist-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--ink);
+    }
+    .checklist-desc {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .live-tester-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 32px;
+      border-top: 1px solid var(--line);
+      padding-top: 32px;
+    }
+    .tester-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .tester-group label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .tester-input {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--ink);
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .tester-input:focus {
+      border-color: var(--primary);
+    }
+    .char-count {
+      font-size: 0.78rem;
+      color: var(--muted);
+      align-self: flex-end;
+    }
+    .char-count.warning {
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <header class="global-navbar">
+    <div class="nav-container">
+      <div class="brand-lockup">
+        <img src="logo.png.png" alt="PDF Assistant Logo" class="site-logo">
+        <div>
+          <p class="eyebrow">PDF Assistant</p>
+          <h1>SEO Checklist</h1>
+        </div>
+      </div>
+      <nav class="converter-nav">
+        <a href="index.html" class="nav-item">Text to PDF</a>
+        <a href="pdf-to-text.html" class="nav-item">PDF to Text</a>
+        <a href="merge-pdf.html" class="nav-item">Merge PDF</a>
+        <a href="compress-pdf.html" class="nav-item">Compress PDF</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="converter-shell">
+    <div class="checklist-card">
+      <div class="score-container">
+        <span class="score-badge" id="scoreBadge">0% Optimization</span>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressBarFill"></div>
+        </div>
+        <p style="margin: 0; font-size: 0.85rem; color: var(--muted);" id="statusMsg">Select checklist items below to evaluate your page setup.</p>
+      </div>
+
+      <div class="checklist-items">
+        <label class="checklist-item">
+          <input type="checkbox" class="seo-checkbox" data-weight="15" />
+          <span class="checklist-label">
+            <span class="checklist-title">Target keyword in &lt;title&gt; tag</span>
+            <span class="checklist-desc">Ensure your main focus keyword appears in the browser tab title, preferably near the start.</span>
+          </span>
+        </label>
+        
+        <label class="checklist-item">
+          <input type="checkbox" class="seo-checkbox" data-weight="15" />
+          <span class="checklist-label">
+            <span class="checklist-title">Target keyword in URL slug</span>
+            <span class="checklist-desc">Add the focus keyword directly inside the page URL slug, separated by hyphens (e.g. /my-target-keyword).</span>
+          </span>
+        </label>
+
+        <label class="checklist-item">
+          <input type="checkbox" class="seo-checkbox" data-weight="15" />
+          <span class="checklist-label">
+            <span class="checklist-title">Keyword in the first &lt;H1&gt; tag</span>
+            <span class="checklist-desc">Include your keyword in the primary header of the page structure. Only use one H1 per page.</span>
+          </span>
+        </label>
+
+        <label class="checklist-item">
+          <input type="checkbox" class="seo-checkbox" data-weight="15" />
+          <span class="checklist-label">
+            <span class="checklist-title">Meta description under 160 characters</span>
+            <span class="checklist-desc">Keep your page description summary brief (between 120 and 160 characters) to prevent clipping in search results.</span>
+          </span>
+        </label>
+
+        <label class="checklist-item">
+          <input type="checkbox" class="seo-checkbox" data-weight="10" />
+          <span class="checklist-label">
+            <span class="checklist-title">Images have descriptive alt text</span>
+            <span class="checklist-desc">Add alt attributes to all images to help search bots understand and index your graphics.</span>
+          </span>
+        </label>
+
+        <label class="checklist-item">
+          <input type="checkbox" class="seo-checkbox" data-weight="15" />
+          <span class="checklist-label">
+            <span class="checklist-title">Internal links to other pages on the site</span>
+            <span class="checklist-desc">Link to other helpful converter tools or resource guides on your domain to distribute page authority.</span>
+          </span>
+        </label>
+
+        <label class="checklist-item">
+          <input type="checkbox" class="seo-checkbox" data-weight="15" />
+          <span class="checklist-label">
+            <span class="checklist-title">Outbound links to authoritative sources</span>
+            <span class="checklist-desc">Link out to highly trusted reference sites (such as Wikipedia or official documentation) to support your text.</span>
+          </span>
+        </label>
+      </div>
+
+      <div class="live-tester-grid">
+        <div class="tester-group">
+          <label for="metaDescInput">Live Meta Tester</label>
+          <textarea id="metaDescInput" class="tester-input" style="height: 80px; resize: none;" placeholder="Paste your meta description here..."></textarea>
+          <span class="char-count" id="charCounter">0 / 160 chars</span>
+        </div>
+        <div class="tester-group">
+          <label for="keywordInput">Keyword Association Scanner</label>
+          <input type="text" id="keywordInput" class="tester-input" placeholder="e.g. text to pdf" />
+          <input type="text" id="titleInput" class="tester-input" style="margin-top: 8px;" placeholder="e.g. Text to PDF Converter - PDF Assistant" />
+          <span class="checklist-desc" id="matchStatus" style="margin-top: 4px;">Enter keyword and title to test matches.</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="ad-section-container" style="max-width: 1200px; margin: 40px auto 0; padding: 0 30px; text-align: center;">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-3815297713781075"
+         data-ad-slot="2313773922"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </div>
+
+  <section class="seo-content">
+    <h2>Interactive On-Page SEO Checklist Utility</h2>
+    <p>
+      Use our free, local SEO Optimization Checklist to evaluate your landing page alignment before publishing. On-page optimization acts as a primary signal to search crawlers regarding your content topic, directly impacting your site indexing performance.
+    </p>
+    <h2>Understanding E-E-A-T and Search Rank</h2>
+    <p>
+      To secure Google AdSense approval, search algorithms assess E-E-A-T: Experience, Expertise, Authoritativeness, and Trustworthiness. Creating optimized metadata, referencing source materials with outbound links, and establishing clear internal site navigation paths ensures search crawlers catalog your application as a reliable resource.
+    </p>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-links">
+      <a href="guides.html">Resource Guides</a>
+      <a href="about.html">About Us</a>
+      <a href="contact.html">Contact Us</a>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms & Conditions</a>
+    </div>
+    <p class="copyright">
+      © 2026 PDF Assistant. All Rights Reserved.
+    </p>
+  </footer>
+
+  <script>
+    const checkboxes = document.querySelectorAll('.seo-checkbox');
+    const scoreBadge = document.getElementById('scoreBadge');
+    const progressBarFill = document.getElementById('progressBarFill');
+    const statusMsg = document.getElementById('statusMsg');
+    
+    const metaDescInput = document.getElementById('metaDescInput');
+    const charCounter = document.getElementById('charCounter');
+    
+    const keywordInput = document.getElementById('keywordInput');
+    const titleInput = document.getElementById('titleInput');
+    const matchStatus = document.getElementById('matchStatus');
+
+    checkboxes.forEach(box => {
+      box.addEventListener('change', calculateScore);
+    });
+
+    function calculateScore() {
+      let score = 0;
+      checkboxes.forEach(box => {
+        if (box.checked) {
+          score += parseInt(box.dataset.weight);
+        }
+      });
+
+      scoreBadge.textContent = `${score}% Optimization`;
+      progressBarFill.style.width = `${score}%`;
+
+      if (score === 100) {
+        scoreBadge.className = 'score-badge complete';
+        progressBarFill.style.backgroundColor = 'var(--primary)';
+        statusMsg.textContent = 'Excellent! Your page is perfectly optimized for crawlers.';
+      } else if (score >= 70) {
+        scoreBadge.className = 'score-badge';
+        progressBarFill.style.backgroundColor = 'var(--primary)';
+        statusMsg.textContent = 'Good progress! Check remaining items for maximum score.';
+      } else {
+        scoreBadge.className = 'score-badge';
+        progressBarFill.style.backgroundColor = 'var(--accent)';
+        statusMsg.textContent = 'Keep optimizing to improve your search visibility.';
+      }
+    }
+
+    metaDescInput.addEventListener('input', () => {
+      const len = metaDescInput.value.length;
+      charCounter.textContent = `${len} / 160 chars`;
+      
+      const metaCheckbox = checkboxes[3]; // Meta description checkbox
+      if (len > 0 && len <= 160) {
+        charCounter.className = 'char-count';
+        if (!metaCheckbox.checked) {
+          metaCheckbox.checked = true;
+          calculateScore();
+        }
+      } else if (len > 160) {
+        charCounter.className = 'char-count warning';
+        if (metaCheckbox.checked) {
+          metaCheckbox.checked = false;
+          calculateScore();
+        }
+      } else {
+        charCounter.className = 'char-count';
+        if (metaCheckbox.checked) {
+          metaCheckbox.checked = false;
+          calculateScore();
+        }
+      }
+    });
+
+    function scanKeywords() {
+      const keyword = keywordInput.value.trim().toLowerCase();
+      const title = titleInput.value.trim().toLowerCase();
+      const titleCheckbox = checkboxes[0]; // Title checkbox
+
+      if (!keyword || !title) {
+        matchStatus.textContent = 'Enter keyword and title to test matches.';
+        matchStatus.style.color = 'var(--muted)';
+        return;
+      }
+
+      if (title.includes(keyword)) {
+        matchStatus.textContent = 'Keyword found in title!';
+        matchStatus.style.color = 'var(--primary)';
+        if (!titleCheckbox.checked) {
+          titleCheckbox.checked = true;
+          calculateScore();
+        }
+      } else {
+        matchStatus.textContent = 'Keyword missing from title.';
+        matchStatus.style.color = 'var(--accent)';
+        if (titleCheckbox.checked) {
+          titleCheckbox.checked = false;
+          calculateScore();
+        }
+      }
+    }
+
+    keywordInput.addEventListener('input', scanKeywords);
+    titleInput.addEventListener('input', scanKeywords);
+  </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const trigger = document.querySelector('.nav-dropdown-trigger');
+    if (trigger) {
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const menu = trigger.nextElementSibling;
+        if (menu) menu.classList.toggle('show');
+      });
+      document.addEventListener('click', () => {
+        const menu = trigger.nextElementSibling;
+        if (menu) menu.classList.remove('show');
+      });
+    }
+  });
+</script>
+
+</body>
+</html>

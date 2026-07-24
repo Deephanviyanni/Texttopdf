@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>PDF to Word Converter - Free Online PDF to DOCX</title>
+  <meta name="description" content="Convert your PDF files to editable Word documents locally. 100% free, secure, and client-side processing." />
+  <link rel="canonical" href="https://text-to-pdf-zeta.vercel.app/pdf-to-word.html" />
+  <meta name="google-adsense-account" content="ca-pub-3815297713781075">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3815297713781075" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.2.2/build/index.iife.min.js"></script>
+  <style>
+    .converter-shell {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 24px;
+    }
+    .uploader-card {
+      background: var(--panel-bg);
+      border: 2px dashed var(--line);
+      border-radius: 16px;
+      padding: 48px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px);
+    }
+    .uploader-card:hover, .uploader-card.dragover {
+      border-color: var(--primary);
+      background: rgba(16, 185, 129, 0.04);
+      box-shadow: var(--primary-glow);
+    }
+    .uploader-card input[type="file"] {
+      display: none;
+    }
+    .upload-icon {
+      font-size: 3rem;
+      color: var(--primary);
+      margin-bottom: 16px;
+    }
+    .upload-text h3 {
+      font-size: 1.25rem;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+    .upload-text p {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+    .result-container {
+      margin-top: 32px;
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      animation: fadeIn 0.3s ease;
+    }
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .textarea-wrapper {
+      position: relative;
+    }
+    .extracted-textarea {
+      width: 100%;
+      height: 380px;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: var(--ink);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    .extracted-textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+    .loader {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 32px;
+    }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--line);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .progress-text {
+      font-weight: 600;
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <header class="global-navbar">
+    <div class="nav-container">
+      <div class="brand-lockup">
+        <img src="logo.png.png" alt="PDF Assistant Logo" class="site-logo">
+        <div>
+          <p class="eyebrow">PDF Assistant</p>
+          <h1>PDF to Word Converter</h1>
+        </div>
+      </div>
+      <nav class="converter-nav">
+        <a href="index.html" class="nav-item">Text to PDF</a>
+        <div class="nav-dropdown">
+          <a class="nav-item nav-dropdown-trigger active">Convert from PDF</a>
+          <div class="nav-dropdown-menu">
+            <a href="pdf-to-text.html" class="nav-dropdown-item">PDF to Text</a>
+            <a href="pdf-to-jpg.html" class="nav-dropdown-item">PDF to JPG</a>
+            <a href="pdf-to-word.html" class="nav-dropdown-item active">PDF to Word</a>
+            <a href="pdf-to-powerpoint.html" class="nav-dropdown-item">PDF to PowerPoint</a>
+            <a href="pdf-to-excel.html" class="nav-dropdown-item">PDF to Excel</a>
+            <a href="pdf-to-pdfa.html" class="nav-dropdown-item">PDF to PDF/A</a>
+          </div>
+        </div>
+        <a href="merge-pdf.html" class="nav-item">Merge PDF</a>
+        <a href="compress-pdf.html" class="nav-item">Compress PDF</a>
+        <a href="guides.html" class="nav-item">Guides</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="converter-shell">
+    <div class="uploader-card" id="dropzone">
+      <input type="file" id="fileInput" accept="application/pdf" />
+      <div class="upload-icon">📝</div>
+      <div class="upload-text">
+        <h3>Choose a PDF file or drag it here</h3>
+        <p>Extract and compile PDF structure into a fully editable DOCX document locally.</p>
+      </div>
+    </div>
+
+    <div class="loader" id="loader">
+      <div class="spinner"></div>
+      <p class="progress-text" id="progressText">Extracting content...</p>
+    </div>
+
+    <div class="result-container" id="resultContainer">
+      <div class="result-header">
+        <div>
+          <h2>Document Text Preview</h2>
+          <p class="eyebrow" id="fileMeta" style="text-transform: none; font-size: 0.85rem; color: var(--muted);"></p>
+        </div>
+        <div class="actions" style="margin: 0; display: flex; gap: 12px;">
+          <button class="secondary" id="resetBtn" type="button">Convert Another</button>
+          <button class="primary" id="downloadDocxBtn" type="button">Download DOCX</button>
+        </div>
+      </div>
+      <div class="textarea-wrapper">
+        <textarea class="extracted-textarea" id="textPreview" readonly></textarea>
+      </div>
+    </div>
+  </main>
+
+  <div class="ad-section-container" style="max-width: 1200px; margin: 40px auto 0; padding: 0 30px; text-align: center;">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-3815297713781075"
+         data-ad-slot="2313773922"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </div>
+
+  <section class="seo-content" style="max-width: 900px; margin: 40px auto; padding: 24px;">
+    <h2>Convert PDF to Word (DOCX) Online Free</h2>
+    <p>
+      PDF Assistant provides a fast, browser-native conversion utility designed to transform standard fixed-layout PDF reports, letters, templates, and text files into fully editable Microsoft Word (.docx) documents. We believe you shouldn't have to upload personal or corporate documents to external servers to perform simple text exports. All parsing and Word package compilation are executed locally in your browser.
+    </p>
+
+    <h2>How to Convert PDF to Word Online</h2>
+    <p>
+      Exporting your PDF content to an editable DOCX file takes just a few steps:
+    </p>
+    <ol>
+      <li><strong>Select your file:</strong> Drag and drop your PDF file into the upload zone, or click to choose a document from your computer.</li>
+      <li><strong>Local Text Parsing:</strong> Our client-side script parses the PDF layers, sorting text tokens into logical page paragraphs and layouts.</li>
+      <li><strong>Preview and Export:</strong> Read the extracted text directly in the scrollable preview pane. Click "Download DOCX" to compile and save your new editable document in seconds.</li>
+    </ol>
+
+    <h2>Why Use Client-Side Word Conversion?</h2>
+    <p>
+      Traditional converters process your files on remote servers, which creates a data security risk for corporate records, billing invoices, or personal cover letters. By compiling documents locally:
+    </p>
+    <ul>
+      <li><strong>100% Security:</strong> No text data or file binaries are transmitted over the web.</li>
+      <li><strong>Instant Performance:</strong> No queue lines or processing delays caused by slow server connections.</li>
+      <li><strong>Offline Compatibility:</strong> If the web page is fully loaded, you can compile your documents even without active internet access.</li>
+    </ul>
+
+    <h2>Frequently Asked Questions</h2>
+    <h3>Will my document formatting be perfectly preserved?</h3>
+    <p>
+      Our converter extracts clean text flow and maintains structural paragraph breaks. Complex graphic elements, overlapping text shapes, or multi-column grids may wrap in a linear sequence to ensure the output remains easy to edit in Microsoft Word.
+    </p>
+    <h3>Do you support scanned PDF documents?</h3>
+    <p>
+      This tool extracts text layers from digitally generated PDFs. Scanned document files (where text exists only as picture pixels) will require Optical Character Recognition (OCR) software.
+    </p>
+    <h3>Is my financial or personal information private?</h3>
+    <p>
+      Yes, absolutely. Because the document parsing runs client-side using JavaScript libraries, your private data remains completely isolated on your machine.
+    </p>
+    <h3>What programs can open the downloaded DOCX file?</h3>
+    <p>
+      The exported file uses the standard Office Open XML (.docx) specification. It is fully compatible with Microsoft Word, Google Docs, Apple Pages, LibreOffice Writer, and other popular word processors.
+    </p>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-links">
+      <a href="guides.html">Resource Guides</a>
+      <a href="about.html">About Us</a>
+      <a href="contact.html">Contact Us</a>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms & Conditions</a>
+    </div>
+    <p class="copyright">
+      © 2026 PDF Assistant. All Rights Reserved.
+    </p>
+  </footer>
+
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const loader = document.getElementById('loader');
+    const progressText = document.getElementById('progressText');
+    const resultContainer = document.getElementById('resultContainer');
+    const textPreview = document.getElementById('textPreview');
+    const fileMeta = document.getElementById('fileMeta');
+    const resetBtn = document.getElementById('resetBtn');
+    const downloadDocxBtn = document.getElementById('downloadDocxBtn');
+
+    let pdfDoc = null;
+    let fileNameBase = 'converted';
+    let extractedPages = []; // Stores array of string lines per page
+
+    dropzone.addEventListener('click', () => fileInput.click());
+
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('dragover');
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length > 0 && files[0].type === 'application/pdf') {
+        handleFile(files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    resetBtn.addEventListener('click', resetConverter);
+
+    function resetConverter() {
+      resultContainer.style.display = 'none';
+      dropzone.style.display = 'block';
+      fileInput.value = '';
+      textPreview.value = '';
+      extractedPages = [];
+      pdfDoc = null;
+    }
+
+    async function handleFile(file) {
+      dropzone.style.display = 'none';
+      loader.style.display = 'flex';
+      progressText.textContent = 'Loading PDF...';
+      fileNameBase = file.name.replace(/\.[^/.]+$/, "");
+
+      try {
+        const fileReader = new FileReader();
+        fileReader.onload = async function() {
+          const typedarray = new Uint8Array(this.result);
+          try {
+            pdfDoc = await pdfjsLib.getDocument(typedarray).promise;
+            fileMeta.textContent = `${file.name} • ${pdfDoc.numPages} Pages`;
+            extractText();
+          } catch (err) {
+            alert('Error parsing PDF: ' + err.message);
+            resetConverter();
+          }
+        };
+        fileReader.readAsArrayBuffer(file);
+      } catch (err) {
+        alert('File read error: ' + err.message);
+        resetConverter();
+      }
+    }
+
+    async function extractText() {
+      try {
+        const numPages = pdfDoc.numPages;
+        let combinedText = "";
+        
+        for (let i = 1; i <= numPages; i++) {
+          progressText.textContent = `Extracting page ${i} of ${numPages}...`;
+          const page = await pdfDoc.getPage(i);
+          const textContent = await page.getTextContent();
+          
+          let lastY = null;
+          let pageLines = [];
+          let currentLine = "";
+
+          for (const item of textContent.items) {
+            if (lastY !== null && Math.abs(item.transform[5] - lastY) > 5) {
+              pageLines.push(currentLine.trim());
+              currentLine = "";
+            }
+            currentLine += item.str + " ";
+            lastY = item.transform[5];
+          }
+          if (currentLine.trim()) {
+            pageLines.push(currentLine.trim());
+          }
+          
+          extractedPages.push(pageLines);
+          combinedText += `--- Page ${i} ---\n` + pageLines.join("\n") + "\n\n";
+        }
+        
+        textPreview.value = combinedText;
+        loader.style.display = 'none';
+        resultContainer.style.display = 'flex';
+      } catch (err) {
+        alert('Text extraction failed: ' + err.message);
+        resetConverter();
+      }
+    }
+
+    downloadDocxBtn.onclick = async () => {
+      if (extractedPages.length === 0) return;
+      
+      downloadDocxBtn.disabled = true;
+      downloadDocxBtn.textContent = 'Generating DOCX...';
+      
+      try {
+        const paragraphs = [];
+        
+        extractedPages.forEach((pageLines, index) => {
+          if (index > 0) {
+            // Add Page Break
+            paragraphs.push(new docx.Paragraph({
+              children: [],
+              pageBreakBefore: true
+            }));
+          }
+          
+          pageLines.forEach(line => {
+            paragraphs.push(new docx.Paragraph({
+              children: [
+                new docx.TextRun({
+                  text: line,
+                  font: "Arial",
+                  size: 24 // 12pt
+                })
+              ],
+              spacing: {
+                after: 120 // Spacing below paragraph
+              }
+            }));
+          });
+        });
+
+        const doc = new docx.Document({
+          sections: [{
+            properties: {},
+            children: paragraphs
+          }]
+        });
+
+        const blob = await docx.Packer.toBlob(doc);
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${fileNameBase}.docx`;
+        a.click();
+        
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+      } catch (err) {
+        alert('Could not compile DOCX file: ' + err.message);
+      } finally {
+        downloadDocxBtn.disabled = false;
+        downloadDocxBtn.textContent = 'Download DOCX';
+      }
+    };
+  </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const trigger = document.querySelector('.nav-dropdown-trigger');
+    if (trigger) {
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const menu = trigger.nextElementSibling;
+        if (menu) menu.classList.toggle('show');
+      });
+      document.addEventListener('click', () => {
+        const menu = trigger.nextElementSibling;
+        if (menu) menu.classList.remove('show');
+      });
+    }
+  });
+</script>
+
+</body>
+</html>

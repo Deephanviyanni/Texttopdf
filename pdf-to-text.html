@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>PDF to Text Converter - Free Online PDF Extractor</title>
+  <meta name="description" content="Extract plain text from your PDF documents instantly. 100% free, secure, and client-side processing." />
+  <link rel="canonical" href="https://text-to-pdf-zeta.vercel.app/pdf-to-text.html" />
+  <meta name="google-adsense-account" content="ca-pub-3815297713781075">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3815297713781075" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+  <style>
+    .converter-shell {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 24px;
+    }
+    .uploader-card {
+      background: var(--panel-bg);
+      border: 2px dashed var(--line);
+      border-radius: 16px;
+      padding: 48px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px);
+    }
+    .uploader-card:hover, .uploader-card.dragover {
+      border-color: var(--primary);
+      background: rgba(16, 185, 129, 0.04);
+      box-shadow: var(--primary-glow);
+    }
+    .uploader-card input[type="file"] {
+      display: none;
+    }
+    .upload-icon {
+      font-size: 3rem;
+      color: var(--primary);
+      margin-bottom: 16px;
+    }
+    .upload-text h3 {
+      font-size: 1.25rem;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+    .upload-text p {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+    .result-container {
+      margin-top: 32px;
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      animation: fadeIn 0.3s ease;
+    }
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .textarea-wrapper {
+      position: relative;
+    }
+    .extracted-textarea {
+      width: 100%;
+      height: 380px;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: var(--ink);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    .extracted-textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+    .loader {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 32px;
+    }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--line);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .progress-text {
+      font-weight: 600;
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <header class="global-navbar">
+    <div class="nav-container">
+      <div class="brand-lockup">
+        <img src="logo.png.png" alt="PDF Assistant Logo" class="site-logo">
+        <div>
+          <p class="eyebrow">PDF Assistant</p>
+          <h1>PDF to Text Converter</h1>
+        </div>
+      </div>
+      <nav class="converter-nav">
+        <a href="index.html" class="nav-item">Text to PDF</a>
+        <div class="nav-dropdown">
+          <a class="nav-item nav-dropdown-trigger active">Convert from PDF</a>
+          <div class="nav-dropdown-menu">
+            <a href="pdf-to-text.html" class="nav-dropdown-item active">PDF to Text</a>
+            <a href="pdf-to-jpg.html" class="nav-dropdown-item">PDF to JPG</a>
+            <a href="pdf-to-word.html" class="nav-dropdown-item">PDF to Word</a>
+            <a href="pdf-to-powerpoint.html" class="nav-dropdown-item">PDF to PowerPoint</a>
+            <a href="pdf-to-excel.html" class="nav-dropdown-item">PDF to Excel</a>
+            <a href="pdf-to-pdfa.html" class="nav-dropdown-item">PDF to PDF/A</a>
+          </div>
+        </div>
+        <a href="merge-pdf.html" class="nav-item">Merge PDF</a>
+        <a href="compress-pdf.html" class="nav-item">Compress PDF</a>
+        <a href="guides.html" class="nav-item">Guides</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="converter-shell">
+    <div class="uploader-card" id="dropzone">
+      <input type="file" id="fileInput" accept="application/pdf" />
+      <div class="upload-icon">📂</div>
+      <div class="upload-text">
+        <h3>Choose a PDF file or drag it here</h3>
+        <p>Your PDF file remains safe. All text extraction is done locally in your browser.</p>
+      </div>
+    </div>
+
+    <div class="loader" id="loader">
+      <div class="spinner"></div>
+      <p class="progress-text" id="progressText">Extracting text...</p>
+    </div>
+
+    <div class="result-container" id="resultContainer">
+      <div class="result-header">
+        <h2>Extracted Text</h2>
+        <div class="actions" style="margin: 0;">
+          <button class="secondary" id="copyBtn" type="button">Copy to Clipboard</button>
+          <button class="primary" id="downloadBtn" type="button">Save as .TXT</button>
+        </div>
+      </div>
+      <div class="textarea-wrapper">
+        <textarea class="extracted-textarea" id="extractedText" readonly></textarea>
+      </div>
+    </div>
+  </main>
+
+  <div class="ad-section-container" style="max-width: 1200px; margin: 40px auto 0; padding: 0 30px; text-align: center;">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-3815297713781075"
+         data-ad-slot="2313773922"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </div>
+
+  <section class="seo-content">
+    <h2>Secure Online PDF Text Extractor</h2>
+    <p>
+      PDF to Text Converter is a utility that extracts plain text from any PDF document. Whether it is an ebook, report, presentation, or scanned document (with text layers), our tool can parse its content instantly.
+    </p>
+    <h2>Privacy-First Local Processing</h2>
+    <p>
+      Unlike other online PDF extractors that upload your files to external servers, this tool works entirely client-side. We use a powerful JavaScript-based rendering engine directly in your browser. Your sensitive files and private records never leave your computer, ensuring absolute privacy and data security.
+    </p>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-links">
+      <a href="guides.html">Resource Guides</a>
+      <a href="about.html">About Us</a>
+      <a href="contact.html">Contact Us</a>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms & Conditions</a>
+    </div>
+    <p class="copyright">
+      © 2026 PDF Assistant. All Rights Reserved.
+    </p>
+  </footer>
+
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const loader = document.getElementById('loader');
+    const progressText = document.getElementById('progressText');
+    const resultContainer = document.getElementById('resultContainer');
+    const extractedText = document.getElementById('extractedText');
+    const copyBtn = document.getElementById('copyBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    dropzone.addEventListener('click', () => fileInput.click());
+
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('dragover');
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length > 0 && files[0].type === 'application/pdf') {
+        handlePdfFile(files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handlePdfFile(e.target.files[0]);
+      }
+    });
+
+    async function handlePdfFile(file) {
+      dropzone.style.display = 'none';
+      loader.style.display = 'flex';
+      resultContainer.style.display = 'none';
+      progressText.textContent = 'Reading PDF...';
+
+      try {
+        const reader = new FileReader();
+        reader.onload = async function() {
+          try {
+            const typedarray = new Uint8Array(this.result);
+            const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
+            let fullText = '';
+            
+            for (let i = 1; i <= pdf.numPages; i++) {
+              progressText.textContent = `Extracting page ${i} of ${pdf.numPages}...`;
+              const page = await pdf.getPage(i);
+              const textContent = await page.getTextContent();
+              const pageText = textContent.items.map(item => item.str).join(' ');
+              fullText += `--- Page ${i} ---\n` + pageText + '\n\n';
+            }
+            
+            loader.style.display = 'none';
+            extractedText.value = fullText.trim() || 'No text content could be extracted from this PDF.';
+            resultContainer.style.display = 'flex';
+          } catch (err) {
+            console.error(err);
+            showError('Error parsing PDF. Please make sure it is not corrupted or password-protected.');
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      } catch (err) {
+        console.error(err);
+        showError('Failed to read file. Please try again.');
+      }
+    }
+
+    function showError(msg) {
+      loader.style.display = 'none';
+      dropzone.style.display = 'block';
+      alert(msg);
+    }
+
+    copyBtn.addEventListener('click', () => {
+      extractedText.select();
+      document.execCommand('copy');
+      copyBtn.textContent = 'Copied!';
+      setTimeout(() => {
+        copyBtn.textContent = 'Copy to Clipboard';
+      }, 2000);
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      const blob = new Blob([extractedText.value], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'extracted-text.txt';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    });
+  </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const trigger = document.querySelector('.nav-dropdown-trigger');
+    if (trigger) {
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const menu = trigger.nextElementSibling;
+        if (menu) menu.classList.toggle('show');
+      });
+      document.addEventListener('click', () => {
+        const menu = trigger.nextElementSibling;
+        if (menu) menu.classList.remove('show');
+      });
+    }
+  });
+</script>
+
+</body>
+</html>
